@@ -16,8 +16,12 @@ install.packages("pacman")
 # Se hace uso de la función p_load, que recibe como parámetros los
 # paquetes a instalar y/o cargar:
 
-pacman::p_load("readxl", "stringi", "igraph", "editrules")  
+pacman::p_load("readxl", "stringi", "igraph", "editrules", "ggplot2")  
 
+# Se añade un archivo R donde irán las funciones provenientes de
+# librerías, pero que por alguna razón necesiten ser modificadas
+
+source("funciones.R")
 
 #--------- a) Lectura de la hoja y adecuación de variables ---------#
 
@@ -54,7 +58,7 @@ str(paises)   # Se comprueba la conversión
 # (Añadido en la posición 3 de p_load [linea 18])
 # En la posición 2 se ha añadido igraph, necesario para editrules.
 
-reglas <- editfile("consistencia.txt")
+reglas <- editrules::editfile("consistencia.txt")
 reglas # Vistazo a las reglas
 
 #--------- c) Aplicación de las reglas de consistencia ---------#
@@ -70,10 +74,29 @@ summary(violaciones_Consistencia)
 # significa que todos los valores cumplen con las reglas, a excepción de
 # los evaluados a NA. Representan los valores que hacen falta en los datos.
 
+# Con dev.new() creamos una ventana donde se alojarán plots
+
 dev.new()
-xd(violaciones_Consistencia)
 
+# Función basada en plot.violatedRules de la librería editrules.
+# Se hacen cambios en los ejes, etiquetas y formas de mostrar
+# la información. Puede verla en funciones.R. Crea un plot donde
+# se muestra la información referente a la violación de reglas
+# por parte de los registros
 
+vrPlot(violaciones_Consistencia)
+
+#--------- d) Identificación de datos faltantes ---------#
+
+# Para identificar visualmente datos faltantes, se usará la función
+# gg_miss_var() proveniente de la librería naniar.
+# (Añadida en la posición 4 de p_load)
+
+dev.new()
+gg_miss_var(paises) + labs(y = "Número de datos faltantes") +
+ggtitle("Datos faltantes por variable") +
+theme(plot.title = element_text(hjust = 0.5)) +
+scale_y_continuous(breaks = seq(0, 20, by = 2))
 
 
 
