@@ -1,0 +1,16 @@
+Grupo > 0
+Grupo < 7
+Tasa.natalidad >= 0
+Tasa.natalidad <= 100
+Tasa.mortalidad >= 0
+Tasa.mortalidad <= 100
+Mortalidad.infantil >= 0
+Mortalidad.infantil <= 400
+Esperanza.vida.hombre >= 0
+Esperanza.vida.hombre <= 150
+Esperanza.vida.mujer >= 0
+Esperanza.vida.mujer <= 150
+PNB >= 0
+Población..miles. >= 0
+
+GRUPOS %in% c("EUROPA ORIENTAL","IBEROAMERICA","EO-NA_JAPON_AUSTR_NZ","ORIENTE MEDIO","ASIA","AFRICA")
