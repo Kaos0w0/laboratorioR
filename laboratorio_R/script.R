@@ -132,8 +132,129 @@ nombres <- names(faltantes)
 # (Añadida en la posición 7 de p_load)
 
 imputacion <- mice(paises, method = "norm.nob", m = 1) # Impute data
-limpiezaParcial <- complete(imputacion)
+paises <- complete(imputacion)
 
 # Se guardan los resultados en un archivo
 
-save(imputacion, file="paises_Limpios.RData")
+save(paises, file="paises_Limpios.RData")
+
+##SEGUNDA PARTE - PARTE GRÁFICA
+##-------------PRIMER PUNTO-----------
+#Se cargan los datos limpios
+load("paises_Limpios.RData")
+
+
+##-------------SEGUNDO PUNTO-----------
+
+
+
+##-------------TERCER PUNTO-----------
+
+#Se modifica el Dataframe para añadir una nueva columna llamada "PNB.per.capita"
+paises <- dplyr::mutate(paises,
+                              PNB.per.capita = PNB/Población..miles.)
+
+coloresPaises <- c("blue","green","purple","red","pink","yellow")
+nombresVacios <- c("","","","","","")
+
+#Realiza un respecivo boxplot de PNB.per.capita a partir de los grupos (DATOS GRANDES)
+x11()
+par(mfrow=c(1,2))
+boxplot(PNB.per.capita ~ GRUPOS, 
+        data = paises,
+        col = coloresPaises,
+        xlab = "Grupos de países",
+        ylab = "PNB per cápita",
+        main = "PNB per cápita por grupos de países",
+        names = nombresVacios)
+
+legend("topleft",
+       legend = c("AFRICA","ASIA","EO-NA_JAPON_AUSTR_NZ","EUROPA ORIENTAL","IBEROAMERICA","ORIENTE MEDIO"),
+       fill = coloresPaises,
+       inset = c(0.03, 0.03),
+       bg = "white",
+       bty = "n")
+
+#Realiza un respecivo boxplot de PNB.per.capita a partir de los grupos (DATOS PEQUEÑOS)
+datosLimpiosSinPaisesGrandes <- dplyr::filter(paises,
+                                              !(GRUPOS %in% c("EO-NA_JAPON_AUSTR_NZ", "ORIENTE MEDIO")))
+boxplot(PNB.per.capita ~ GRUPOS, 
+        data = datosLimpiosSinPaisesGrandes,
+        col = coloresPaises,
+        xlab = "Grupos de países",
+        ylab = "PNB per cápita",
+        ylim = c(0,0.3),
+        main = "PNB per cápita por grupos de países",
+        names = nombresVacios)
+
+##-------------CUARTO PUNTO-------------
+#Obtenemos los respectivos percentiles
+percentiles <- quantile(paises$PNB.per.capita)
+
+#Añadimos el respectivo nivel de pobreza al respectivo dataframe
+paises <- dplyr::mutate(paises, nivel.pobreza = dplyr::case_when(
+  PNB.per.capita < percentiles[2] ~ "Bajo",
+  PNB.per.capita < percentiles[3] ~ "Medio Bajo",
+  PNB.per.capita < percentiles[4] ~ "Medio Alto",
+  PNB.per.capita < percentiles[5] ~ "Alto"
+))
+
+#Creamos tablas de frecuencias a partir de cada país
+tfAf <- dplyr::filter(paises, GRUPOS == "AFRICA")$nivel.pobreza
+tfAf <- table(factor(tfAf, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfAf <- tfAf/sum(tfAf)
+
+tfAs <- dplyr::filter(paises, GRUPOS == "ASIA")$nivel.pobreza
+tfAs <- table(factor(tfAs, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfAs <- tfAs/sum(tfAs)
+
+tfEo <- dplyr::filter(paises, GRUPOS == "EO-NA_JAPON_AUSTR_NZ")$nivel.pobreza
+tfEo <- table(factor(tfEo, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfEo <- tfEo/sum(tfEo)
+
+tfEor <- dplyr::filter(paises, GRUPOS == "EUROPA ORIENTAL")$nivel.pobreza
+tfEor <- table(factor(tfEor, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfEor <- tfEor/sum(tfEor)
+
+tfIb <- dplyr::filter(paises, GRUPOS == "IBEROAMERICA")$nivel.pobreza
+tfIb <- table(factor(tfIb, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfIb <- tfIb/sum(tfIb)
+
+tfOm <- dplyr::filter(paises, GRUPOS == "ORIENTE MEDIO")$nivel.pobreza
+tfOm <- table(factor(tfOm, levels=c("Alto","Medio Alto","Medio Bajo","Bajo")))
+tfOm <- tfOm/sum(tfOm)
+
+
+#Creamos un Data Frame que nos servirá para realizar el gráfico
+data <- data.frame(tfAf, tfAs, tfEo, tfEor, tfIb, tfOm)
+#Elimanos a que nivel de pobreza pertenece
+data<- data[,-c(1,3,5,7,9,11)]
+#Le asignamos el grupo de país al que pertenece cada columna
+colnames(data) <- c("AFRICA","ASIA","EO-NA_JAPON_AUSTR_NZ","EUROPA ORIENTAL","IBEROAMERICA","ORIENTE MEDIO")
+
+#Realizamos el barplot de múltiples columnas.
+x11()
+barplot(as.matrix(data),
+        main="Niveles de pobreza por grupos de países",
+        
+        # setting y label only
+        # because x-label will be our
+        # barplots name
+        ylab="Cantidad",
+        xlab="Grupos de países",
+        
+        # to plot the bars vertically
+        beside=TRUE,
+        
+        col=c("#D8E9A8","#4E9F3D","#1E5128","#191A19"),
+        ylim = c(0,1)
+)
+
+#Añadimos legenda con información de los colores
+legend("topright",
+       legend = c("Alto","Medio alto","Medio bajo","Bajo"),
+       fill = c("#D8E9A8","#4E9F3D","#1E5128","#191A19"),
+       inset = c(0.03, 0.03),
+       bg = "white",
+       bty = "n")
+
