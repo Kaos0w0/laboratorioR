@@ -16,7 +16,8 @@ install.packages("pacman")
 # Se hace uso de la función p_load, que recibe como parámetros los
 # paquetes a instalar y/o cargar:
 
-pacman::p_load("readxl", "stringi", "igraph", "editrules", "ggplot2")  
+pacman::p_load("readxl", "stringi", "igraph", "editrules", "ggplot2",
+               "naniar", "gridExtra", "mice")  
 
 # Se añade un archivo R donde irán las funciones provenientes de
 # librerías, pero que por alguna razón necesiten ser modificadas
@@ -88,16 +89,51 @@ vrPlot(violaciones_Consistencia)
 
 #--------- d) Identificación de datos faltantes ---------#
 
-# Para identificar visualmente datos faltantes, se usará la función
-# gg_miss_var() proveniente de la librería naniar.
+# Para identificar visualmente cuantos datos faltantes tiene una columna,
+# se usará la función gg_miss_var() proveniente de la librería ggplot2
 # (Añadida en la posición 4 de p_load)
 
-dev.new()
-gg_miss_var(paises) + labs(y = "Número de datos faltantes") +
+plot1 <- gg_miss_var(paises) + labs(y = "Número de datos faltantes") +
 ggtitle("Datos faltantes por variable") +
 theme(plot.title = element_text(hjust = 0.5)) +
 scale_y_continuous(breaks = seq(0, 20, by = 2))
 
+# Para identificar visualmente datos faltantes en un grupo de datos,
+# se usará la función vis_miss() proveniente de la librería naniar
+# (Añadida en la posición 5 de p_load)
 
+plot2 <- vis_miss(paises)
 
+# Se crea una ventana que presenta la vista general de datos faltantes,
+# junto con un plot que muestra específicamente cuantos de estos hay por
+# columna. Para dividir la ventana en dos, se usa la función grid.arrange,
+# proveniente de la librería gridExtra.
+# (Añadida en la posición 6 de p_load)
 
+x11(width = 12, height = 10)
+grid.arrange(plot2, plot1, ncol=2)
+
+# Se muestra en consola las columnas con datos faltantes, indicando su
+# posición exacta (fila en la que se encuentran)
+
+faltantes <- sapply(paises, function(x) which(is.na(x)))
+faltantes <- faltantes[!(faltantes %in% list(c(integer(0))))]
+faltantes
+
+# Se guardan los nombres de las columnas con datos faltantes para poder
+# acceder a ellas a la hora de imputar.
+
+nombres <- names(faltantes)
+
+#--------- e) Imputación de datos faltantes ---------#
+
+# La imputación se hará con regresión estocástica, con ayuda de la
+# función mice, proveniente de la librería con el mismo nombre.
+# (Añadida en la posición 7 de p_load)
+
+imputacion <- mice(paises, method = "norm.nob", m = 1) # Impute data
+limpiezaParcial <- complete(imputacion)
+
+# Se guardan los resultados en un archivo
+
+save(imputacion, file="paises_Limpios.RData")
