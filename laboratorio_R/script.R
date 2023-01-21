@@ -139,14 +139,77 @@ paises <- complete(imputacion)
 save(paises, file="paises_Limpios.RData")
 
 ##SEGUNDA PARTE - PARTE GRÁFICA
+
 ##-------------PRIMER PUNTO-----------
 #Se cargan los datos limpios
 load("paises_Limpios.RData")
 
+#Definición de variable grupos
+distribucion <- table(paises$GRUPOS)
+grupos <- c("AFRICA",
+            "ASIA",
+            "EO-NA_JAPON_AUSTR_NZ",
+            "EUROPA ORIENTAL",
+            "IBEROAMERICA",
+            "ORIENTE MEDIO")
+
+x11()
+barplot(distribucion,
+        main = "Distribución paises por grupo",
+        xlab = "Grupos",
+        ylab = "Cantidad de paises",
+        ylim = c(0,35),
+        font.axis = 4,
+        names.arg = c(" "," "," "," "," "," "),
+        col = c("blue","green","purple","red","pink","yellow"))
+legend(x = "topright", legend = c(grupos),
+       fill = c("blue","green","purple","red","pink","yellow"),
+       bty = "n")
 
 ##-------------SEGUNDO PUNTO-----------
+x11()
+par(mfrow=c(1,3)) #definir el espacio de trabajo para 3 boxplots
 
+#creacion del primer boxplot
+boxplot(paises$Tasa.mortalidad ~ paises$Grupo,
+        names = c("","","","","",""),
+        main = "Tasa Mortalidad Por grupos",
+        ylab = "Tasa Mortalidad",
+        ylimit = c(0,32),
+        xlab = "Grupos",
+        col = c("blue","green","purple","red","pink","yellow"))
 
+#inserción de una leyenda para facilitar lectura
+legend(x = "topleft", legend = c(grupos),
+       fill = c("blue","green","purple","red","pink","yellow"),
+       bty = "n")
+
+#segundo boxplot
+boxplot(paises$Tasa.natalidad ~ paises$Grupo,
+        names = c("","","","","",""),
+        main = "Tasa Natalidad por grupos",
+        ylab = "Tasa Natalidad",
+        ylimit = c(0,57),
+        xlab = "Grupos",
+        col = c("blue","green","purple","red","pink","yellow"))
+
+##leyenda de datos
+legend(x = "topleft", legend = c(grupos),
+       fill = c("blue","green","purple","red","pink","yellow"),
+       bty = "n")
+
+#tercer boxplot
+boxplot(paises$Mortalidad.infantil ~ paises$Grupo,
+        names = c("","","","","",""),
+        main = "Tasa Mortalidad Infantil por grupos",
+        ylab = "Tasa Mortalidad Infantil",
+        xlab = "Grupos",
+        col = c("blue","green","purple","red","pink","yellow"))
+
+#leyenda de datos
+legend(x = "topleft", legend = c(grupos),
+       fill = c("blue","green","purple","red","pink","yellow"),
+       bty = "n")
 
 ##-------------TERCER PUNTO-----------
 
@@ -257,4 +320,3 @@ legend("topright",
        inset = c(0.03, 0.03),
        bg = "white",
        bty = "n")
-
