@@ -167,7 +167,7 @@ legend(x = "topright", legend = c(grupos),
        bty = "n")
 
 ##-------------SEGUNDO PUNTO-----------
-x11()
+x11(width = 12, height = 10)
 par(mfrow=c(1,3)) #definir el espacio de trabajo para 3 boxplots
 
 #creacion del primer boxplot
