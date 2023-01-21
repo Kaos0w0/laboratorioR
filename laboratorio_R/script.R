@@ -256,7 +256,7 @@ percentiles <- quantile(paises$PNB.per.capita)
 
 #Añadimos el respectivo nivel de pobreza al respectivo dataframe
 paises <- dplyr::mutate(paises, nivel.pobreza = dplyr::case_when(
-  PNB.per.capita < percentiles[2] ~ "Bajo",
+  PNB.per.capita <= percentiles[2] ~ "Bajo",
   PNB.per.capita < percentiles[3] ~ "Medio Bajo",
   PNB.per.capita < percentiles[4] ~ "Medio Alto",
   PNB.per.capita <= percentiles[5] ~ "Alto"
